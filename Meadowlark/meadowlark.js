@@ -1,3 +1,4 @@
+var fortune = require('./lib/fortune.js');
 var express = require('express'); 
 var app = express();
  
@@ -8,12 +9,11 @@ app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 app.use(express.static(__dirname + '/public'));
 
-var fortunes = ["Conquer your fears or they will conquer you.", 
-		"Rivers need springs.", 
-		"Do not fear what you don't know.", 
-		"You will have a pleasant surprise.", 
-		"Whenever possible, keep it simple.", 
-];
+app.use(function(req, res, next) { 
+ 	res.locals.showTests = app.get('env') !== 'production' && req.query.test === '1'; 
+ 	next(); 
+});
+
 var d = new Date();
 var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -22,8 +22,9 @@ app.get('/', function(req, res) {
         res.render('home');
 });
 app.get('/about', function(req, res) {
-	var randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-        res.render('about', {fortune: randomFortune});
+        res.render('about', {fortune: fortune.getFortune(),
+		pageTestScript: '/qa/tests-about.js'
+	});
 });
 
 app.get('/datetime', function(req, res) {
